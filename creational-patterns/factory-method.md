@@ -105,3 +105,53 @@ var laptop = LaptopFactory.makeLaptop({ memory: 16 });
 
 想让工厂生产台式机？让我们再加一个抽象层，即建立多个车间。
 
+```js
+var Computer = function () {
+    this.power = false;
+};
+
+Computer.prototype.powerOn = function () { this.power = true; };
+Computer.prototype.powerOff = function () { this.power = false; };
+
+var Factory = function () {};
+Factory.prototype = {
+    installBasicHardware: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
+        this.cpu = new CPU(cpu);
+        this.memory = new Memory(memory);
+        this.hardDisk = new HardDisk(hardDisk);
+    },
+    make: function () {
+        console.log('Abstract factory cannot make computer');
+    }, 
+    installSystem: function () {
+        Windows.installOn(this);
+    }
+};
+
+var LaptopFactor = function () {};
+LaptopFactory.prototype = new Factory();
+LaptopFactory.prototype.make = function (config) {
+    var laptop = new Computer();
+    
+    laptop.installBasicHardware(config);
+    
+    laptop.screen = false;
+    laptop.openLid = function () { this.screen = true; };
+    laptop.closeLid = function () { this.screen = false; };
+    
+    return laptop;
+};
+
+var PcFactory = function () {};
+PcFactory.prototype = new Factory();
+PcFactory.prototype.make = function (config) {
+    var pc = new Computer();
+    
+    laptop.installBasicHardware(config);
+
+    return pc;
+};
+```
+
+
+
