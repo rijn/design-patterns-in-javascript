@@ -3,7 +3,7 @@
 * [介绍](README.md)
 * [基本原则](/basic-principles.md)
 * [创建型模式（Creational Patterns\)](/creational-patterns/README.md)
-  * [工厂（Factory）](/creational-patterns/factory-pattern.md)
+  * [工厂（Factory Method）](/creational-patterns/factory-method.md)
   * 抽象工厂（Abstract Factory）
   * 建造者（Builder）
   * 原型（Prototype）
