@@ -77,7 +77,26 @@ var laptop = LaptopFactory.makeLaptop();
 扩展生产线，让工厂可以生产更多型号的电脑！
 
 ```js
+var LaptopFactory = {
+    makeLaptop: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
+        var laptop = new Laptop();
 
+        laptop.cpu = new CPU(cpu);
+        laptop.memory = new Memory(memory);
+        laptop.hardDisk = new HardDisk(hardDisk);
+
+        laptop = Windows.installOn(laptop);
+
+        laptop.power = false;cpu
+        laptop.powerOn = function () { this.power = true; };
+        laptop.powerOff = function () { this.power = false; };
+
+        return laptop;
+    }
+};
+
+// 我想要更多内存
+var laptop = LaptopFactory.makeLaptop({ memory: 16 });
 ```
 
 在这里的简单工厂模式，又叫静态工厂方法（Static Factory Method），是最简单的工厂方法。实际上，这个方法违背了我们的开闭原则。使用简单模式的电脑工厂，只能生产同类型的产品，即电脑。如果我们修改工厂产生Laptop的基类，想让这个工厂生产更多不同类型的产品，比如台式机，那么不仅需要修改生产的方法，也需要修改消费者下订单的代码。
