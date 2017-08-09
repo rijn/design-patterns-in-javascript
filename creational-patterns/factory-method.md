@@ -49,7 +49,7 @@ laptop.powerOff = function () { this.power = false; };
 // 定义一个电脑工厂
 var LaptopFactory = {
     // 工厂可以生产Laptop
-    makeLaptop: function () 
+    makeLaptop: function () {
         var laptop = new Laptop();
 
         laptop.cpu = new CPU('i7-2600');
@@ -61,7 +61,7 @@ var LaptopFactory = {
         laptop.power = false;
         laptop.powerOn = function () { this.power = true; };
         laptop.powerOff = function () { this.power = false; };
-        
+
         return laptop;
     }
 };
