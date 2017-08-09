@@ -128,17 +128,17 @@ Factory.prototype = {
     }
 };
 
-var LaptopFactor = function () {};
+var LaptopFactory = function () {};
 LaptopFactory.prototype = new Factory();
 LaptopFactory.prototype.make = function (config) {
     var laptop = new Computer();
-    
+
     laptop.installBasicHardware(config);
-    
+
     laptop.screen = false;
     laptop.openLid = function () { this.screen = true; };
     laptop.closeLid = function () { this.screen = false; };
-    
+
     return laptop;
 };
 
@@ -146,7 +146,7 @@ var PcFactory = function () {};
 PcFactory.prototype = new Factory();
 PcFactory.prototype.make = function (config) {
     var pc = new Computer();
-    
+
     laptop.installBasicHardware(config);
 
     return pc;
