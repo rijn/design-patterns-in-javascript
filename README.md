@@ -1,3 +1,4 @@
-# My Awesome Book
+# JavaScript 设计模式
 
-This file file serves as your book's preface, a great place to describe your book's content and ideas.
+这个文档是用来复习设计模式的。
+
