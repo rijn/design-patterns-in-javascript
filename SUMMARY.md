@@ -6,6 +6,8 @@
   * [工厂（Factory Method）](/creational-patterns/factory-method.md)
   * 抽象工厂（Abstract Factory）
   * 建造者（Builder）
+  * 对象池（Object Pool）
+  * 迟加载（Lazy Initialization）
   * 原型（Prototype）
   * 单例（Singleton）
 * [结构型模式（Structural Patterns）](/structural-patterns/README.md)
