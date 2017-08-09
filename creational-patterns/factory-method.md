@@ -115,10 +115,10 @@ Computer.prototype.powerOff = function () { this.power = false; };
 
 var Factory = function () {};
 Factory.prototype = {
-    installBasicHardware: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
-        this.cpu = new CPU(cpu);
-        this.memory = new Memory(memory);
-        this.hardDisk = new HardDisk(hardDisk);
+    installBasicHardware: function (computer = {}, { cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
+        computer.cpu = new CPU(cpu);
+        computer.memory = new Memory(memory);
+        computer.hardDisk = new HardDisk(hardDisk);
     },
     make: function () {
         console.log('Abstract factory cannot make computer');
@@ -133,7 +133,7 @@ LaptopFactory.prototype = new Factory();
 LaptopFactory.prototype.make = function (config) {
     var laptop = new Computer();
 
-    laptop.installBasicHardware(config);
+    this.installBasicHardware(laptop, config);
 
     laptop.screen = false;
     laptop.openLid = function () { this.screen = true; };
@@ -147,7 +147,7 @@ PcFactory.prototype = new Factory();
 PcFactory.prototype.make = function (config) {
     var pc = new Computer();
 
-    laptop.installBasicHardware(config);
+    this.installBasicHardware(pc, config);
 
     return pc;
 };
