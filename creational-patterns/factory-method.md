@@ -18,28 +18,39 @@ laptop.powerOn();
 我们还是用生产电脑来举例。假如没有工厂，消费者就需要自己动手。意味着消费者需要自己购入零件，自己装配。对于一台笔记本，我们要做的事情有：
 
 ```js
-// 定义一个模型，假装它是我们的电脑
+const CPU = function () {};
+const Memory = function () {};
+const HardDisk = function () {};
+const Windows = { installOn: function (laptop) { return laptop; } };
+
+var Laptop = function () {
+    // 笔记本的固有属性
+    return {
+        power: false
+    };
+};
+
+// 我想要一台笔记本
 var laptop = new Laptop();
 
-// 给这个电脑装上CPU，内存，硬盘
+// 还需要给这个电脑装上CPU，内存，硬盘
 laptop.cpu = new CPU('i7-2600');
 laptop.memory = new Memory(8);
 laptop.hardDisk = new HardDisk(512);
 
-// 给这个电脑安装系统
+// 还需要给这个电脑安装系统
 laptop = Windows.installOn(laptop);
 
-// 安装开关和LED，使这台电脑可以开关机
-laptop.power = false;
+// 还需要安装开关，使这台电脑可以开关机
 laptop.powerOn = function () { this.power = true; };
 laptop.powerOff = function () { this.power = false; };
 ```
 
 试想一下，当我们有多个消费者都需要购买这台电脑时，或是消费者对于电脑有不同的需求，你就需要new多次，同时修改CPU的配置，这样的实现十分繁琐。所以我们希望将制造笔记本的工作交给工厂来完成，而消费者只需要向工厂派发订单即可拿到他们想要的笔记本。
 
-### 简单工厂
+## 车间
 
-下面我们来尝试用JavaScript实现一个简单的工厂。请看下面的例子：
+下面我们来尝试用JavaScript实现一个简单的车间。创造车间的意义在于，我们不想让消费者涉及到组装笔记本的逻辑，让这些繁琐的工作都交给专业的车间来解决。请看下面的例子：
 
 ```js
 const CPU = function () {};
@@ -48,7 +59,6 @@ const HardDisk = function () {};
 const Windows = { installOn: function (laptop) { return laptop; } };
 
 var Laptop = function () {
-    // 笔记本的固有属性
     return {
         power: false
     };
@@ -74,14 +84,14 @@ var LaptopFactory = {
 };
 ```
 
-这个笔记本工厂现在只做了一件事情，就是生产笔记本电脑，并且只能生产一种型号。抽象地来说，我们定义了一个叫做`LaptopFactory`的类，这个类只有一个方法，用来创建和返回`Laptop`对象。但我们已经可以初见工厂的效力：
+这个笔记本车间现在只做了一件事情，就是生产笔记本电脑，并且只能生产一种型号。抽象地来说，我们定义了一个叫做`LaptopFactory`的类，这个类只有一个方法，用来创建和返回`Laptop`对象。但我们已经可以初见它的效力：
 
 ```js
 // 想要一台笔记本？向工厂下订单！
 var laptop = LaptopFactory.makeLaptop();
 ```
 
-然而这个工厂只可以生产一种型号的笔记本，这样怎么可以忽悠土豪呢？让我们扩展生产线，使工厂变得更好，这样工厂就可以生产更多型号的笔记本！
+然而这个车间只可以生产一种型号的笔记本，这样怎么可以忽悠土豪呢？让我们扩展生产线，使车间变得更好，这样就可以生产更多型号的笔记本！
 
 ```js
 const CPU = function () {};
@@ -91,7 +101,6 @@ const Windows = function () { return { installOn: function (laptop) { laptop.sys
 const MacOs = function () { return { installOn: function (laptop) { laptop.system = 'macOS'; return laptop; } }; };
 
 var Laptop = function () {
-    // 笔记本的固有属性
     return {
         power: false
     };
@@ -124,9 +133,70 @@ var LaptopFactory = {
 var laptop = LaptopFactory.makeLaptop({ memory: 16, system: 'macOS' });
 ```
 
+车间还不能够被称之为工厂，因为它的产量有限，且产品太单一了。如果客户想要其他类型的电脑，比如台式机、服务器，或是其他品牌的电脑，一个车间就无能为力了。当然，我们可以再次扩充生产线，使它在一定程度上表现出工厂的效能。
+
+```js
+const CPU = function () {};
+const Memory = function () {};
+const HardDisk = function () {};
+const Windows = function () { return { installOn: function (laptop) { laptop.system = 'Windows'; return laptop; } }; };
+const MacOs = function () { return { installOn: function (laptop) { laptop.system = 'macOS'; return laptop; } }; };
+
+// 定义两种电脑：笔记本和台式机
+var Computer = function () {
+    this.power = false;
+};
+var Laptop = function () {};
+Laptop.prototype = new Computer();
+var Pc = function () {};
+Pc.prototype = new Computer();
+
+var ComputerFactory = {
+    Windows: new Windows(),
+    MacOs: new MacOs(),
+    make: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512, system = null, type = 'laptop' } = {}) {
+        var computer;
+        
+        switch (type) {
+            case 'laptop':
+                computer = new Laptop();
+                break;
+            case 'pc':
+                computer = new Pc();
+                break;
+            default:
+                throw 'Cannot make ' + type;
+        }
+
+        computer.cpu = new CPU(cpu);
+        computer.memory = new Memory(memory);
+        computer.hardDisk = new HardDisk(hardDisk);
+
+        if (system === 'Windows') {
+            computer = this.Windows.installOn(computer);
+        } else if (system === 'macOS') {
+            computer = this.MacOs.installOn(computer);
+        }
+
+        computer.powerOn = function () { this.power = true; };
+        computer.powerOff = function () { this.power = false; };
+
+        return computer;
+    }
+};
+
+// 我想要一台笔记本
+var laptop = ComputerFactory.make({ type: 'laptop' });
+
+// 我想要一台台式机
+var pc = ComputerFactory.make({ type: 'pc' });
+```
+
 在这里的简单工厂模式，又叫静态工厂方法（Static Factory Method），是最简单的工厂方法。实际上，这个方法违背了我们的开闭原则。使用简单模式的笔记本工厂，只能生产同类型的产品，即笔记本。如果我们修改工厂产生Laptop的基类，想让这个工厂生产更多不同类型的产品，比如台式机，那么不仅需要修改生产的方法，也需要修改消费者下订单的代码。
 
 ## 工厂方法
+
+真正的工厂方法比起简单工厂更加抽象。根据工厂方法的定义，我们需要使一个类的实例化推迟到子类中进行
 
 想让工厂生产台式机？让我们再加一个抽象层，即建立多个车间。
 
