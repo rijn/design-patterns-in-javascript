@@ -270,7 +270,8 @@ Pc.prototype = new Computer();
 var Factory = function () {};
 Factory.prototype = {
     // 安装标准三件套
-    installBasicHardware: function (computer = {}, { cpu = 'i7-2600', memory = 8, hardDisk = 512 } = {}) {
+    installBasicHardware: function (computer = {},
+        { cpu = 'i7-2600', memory = 8, hardDisk = 512 } = {}) {
         computer.cpu = new CPU(cpu);
         computer.memory = new Memory(memory);
         computer.hardDisk = new HardDisk(hardDisk);
