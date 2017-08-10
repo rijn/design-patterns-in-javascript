@@ -151,12 +151,14 @@ Laptop.prototype = new Computer();
 var Pc = function () {};
 Pc.prototype = new Computer();
 
+// 再次扩展我们的生产线
 var ComputerFactory = {
     Windows: new Windows(),
     MacOs: new MacOs(),
     make: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512, system = null, type = 'laptop' } = {}) {
         var computer;
-        
+
+        // 根据用户的选择生产不同的电脑
         switch (type) {
             case 'laptop':
                 computer = new Laptop();
