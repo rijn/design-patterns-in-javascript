@@ -97,8 +97,22 @@ var laptop = LaptopFactory.makeLaptop();
 const CPU = function () {};
 const Memory = function () {};
 const HardDisk = function () {};
-const Windows = function () { return { installOn: function (laptop) { laptop.system = 'Windows'; return laptop; } }; };
-const MacOs = function () { return { installOn: function (laptop) { laptop.system = 'macOS'; return laptop; } }; };
+const Windows = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'Windows';
+            return laptop;
+        }
+    };
+};
+const MacOs = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'macOS';
+            return laptop;
+        }
+    };
+};
 
 var Laptop = function () {
     return {
@@ -145,8 +159,22 @@ var laptop = LaptopFactory.makeLaptop({ memory: 16, system: 'macOS' });
 const CPU = function () {};
 const Memory = function () {};
 const HardDisk = function () {};
-const Windows = function () { return { installOn: function (laptop) { laptop.system = 'Windows'; return laptop; } }; };
-const MacOs = function () { return { installOn: function (laptop) { laptop.system = 'macOS'; return laptop; } }; };
+const Windows = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'Windows';
+            return laptop;
+        }
+    };
+};
+const MacOs = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'macOS';
+            return laptop;
+        }
+    };
+};
 
 // 定义两种电脑：笔记本和台式机
 var Computer = function () {
