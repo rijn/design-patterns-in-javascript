@@ -35,17 +35,29 @@ laptop.powerOn = function () { this.power = true; };
 laptop.powerOff = function () { this.power = false; };
 ```
 
-试想一下，当我们有多个消费者都需要购买这台电脑时，或是消费者对于电脑有不同的需求，你就需要new多次，同时修改CPU的配置，这样的实现十分繁琐。所以我们希望将制造笔记本的工作交给工厂来完成，而消费者只需要向工厂派发订单。
+试想一下，当我们有多个消费者都需要购买这台电脑时，或是消费者对于电脑有不同的需求，你就需要new多次，同时修改CPU的配置，这样的实现十分繁琐。所以我们希望将制造笔记本的工作交给工厂来完成，而消费者只需要向工厂派发订单即可拿到他们想要的笔记本。
 
 ### 简单工厂
 
 下面我们来尝试用JavaScript实现一个简单的工厂。请看下面的例子：
 
 ```js
-// 定义一个电脑工厂
+const CPU = function () {};
+const Memory = function () {};
+const HardDisk = function () {};
+const Windows = { installOn: function (laptop) { return laptop; } };
+
+var Laptop = function () {
+    // 笔记本的固有属性
+    return {
+        power: false
+    };
+};
+
+// 定义一个笔记本工厂
 var LaptopFactory = {
     // 工厂可以生产Laptop
-    makeLaptop: function () {
+    makeLaptop () {
         var laptop = new Laptop();
 
         laptop.cpu = new CPU('i7-2600');
@@ -54,7 +66,6 @@ var LaptopFactory = {
 
         laptop = Windows.installOn(laptop);
 
-        laptop.power = false;
         laptop.powerOn = function () { this.power = true; };
         laptop.powerOff = function () { this.power = false; };
 
@@ -63,27 +74,45 @@ var LaptopFactory = {
 };
 ```
 
-这个电脑工厂现在只做了一件事情，就是生产笔记本，并且只能生产一种型号。但我们已经可以初见工厂的效力：
+这个笔记本工厂现在只做了一件事情，就是生产笔记本电脑，并且只能生产一种型号。抽象地来说，我们定义了一个叫做`LaptopFactory`的类，这个类只有一个方法，用来创建和返回`Laptop`对象。但我们已经可以初见工厂的效力：
 
 ```js
-// 想要一台电脑？向工厂下订单！
+// 想要一台笔记本？向工厂下订单！
 var laptop = LaptopFactory.makeLaptop();
 ```
 
-扩展生产线，让工厂可以生产更多型号的电脑！
+然而这个工厂只可以生产一种型号的笔记本，这样怎么可以忽悠土豪呢？让我们扩展生产线，使工厂变得更好，这样工厂就可以生产更多型号的笔记本！
 
 ```js
+const CPU = function () {};
+const Memory = function () {};
+const HardDisk = function () {};
+const Windows = function () { return { installOn: function (laptop) { laptop.system = 'Windows'; return laptop; } }; };
+const MacOs = function () { return { installOn: function (laptop) { laptop.system = 'macOS'; return laptop; } }; };
+
+var Laptop = function () {
+    // 笔记本的固有属性
+    return {
+        power: false
+    };
+};
+
 var LaptopFactory = {
-    makeLaptop: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
+    Windows: new Windows(),
+    MacOs: new MacOs(),
+    makeLaptop: function ({ cpu = 'i7-2600', memory = 8, hardDisk = 512, system = null } = {}) {
         var laptop = new Laptop();
 
         laptop.cpu = new CPU(cpu);
         laptop.memory = new Memory(memory);
         laptop.hardDisk = new HardDisk(hardDisk);
 
-        laptop = Windows.installOn(laptop);
+        if (system === 'Windows') {
+            laptop = this.Windows.installOn(laptop);
+        } else if (system === 'macOS') {
+            laptop = this.MacOs.installOn(laptop);
+        }
 
-        laptop.power = false;cpu
         laptop.powerOn = function () { this.power = true; };
         laptop.powerOff = function () { this.power = false; };
 
@@ -92,12 +121,12 @@ var LaptopFactory = {
 };
 
 // 我想要更多内存
-var laptop = LaptopFactory.makeLaptop({ memory: 16 });
+var laptop = LaptopFactory.makeLaptop({ memory: 16, system: 'macOS' });
 ```
 
 在这里的简单工厂模式，又叫静态工厂方法（Static Factory Method），是最简单的工厂方法。实际上，这个方法违背了我们的开闭原则。使用简单模式的电脑工厂，只能生产同类型的产品，即电脑。如果我们修改工厂产生Laptop的基类，想让这个工厂生产更多不同类型的产品，比如台式机，那么不仅需要修改生产的方法，也需要修改消费者下订单的代码。
 
-### 工厂方法
+## 工厂方法
 
 想让工厂生产台式机？让我们再加一个抽象层，即建立多个车间。
 
