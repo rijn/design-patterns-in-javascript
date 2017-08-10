@@ -236,6 +236,8 @@ var pc = ComputerFactory.make({ type: 'pc' });
 
 真正的工厂方法比起简单工厂更加抽象。根据工厂方法的定义，即“定义一个创建对象的接口，但让实现这个接口的类来决定实例化哪个类。工厂方法让类的实例化推迟到子类中进行”，我们需要在简单工厂的基础上再次抽象。为了提高产量，我们决定成立一个集团，其名下有多个工厂。为了保证产品的质量，集团规定了一个工厂的标准，因此工厂仅能按照规定的流程和计划来生产。为了保证分工明确，每个工厂负责生产不同类型的电脑。在抽象层，我们创建了一个抽象类，其中包含了多个子类，它负责决定创建那个对象（具体工厂生产具体产品），及管理对象的生命周期（派发及收回）。我们用例子来说明。
 
+我们先定义一些基础的组件。
+
 ```js
 const CPU = function () {};
 const Memory = function () {};
@@ -256,7 +258,11 @@ const MacOs = function () {
         }
     };
 };
+```
 
+接着让我们定义对象类。这里的电脑只是抽象的概念，仅仅是产品目录上的一张图片。对于工厂来说，这就是制造电脑的模型和图纸，大概没有消费者会照着目录上的图片自己组装电脑吧（笑）。
+
+```js
 var Computer = function () {
     this.power = false;
 };
@@ -265,7 +271,11 @@ var Laptop = function () { return { screen: false }; };
 Laptop.prototype = new Computer();
 var Pc = function () {};
 Pc.prototype = new Computer();
+```
 
+下面让我们进入正题——工厂。集团为了控制共产的标准产出，定义了一个工厂的标准，这就是我们的`Factory`。每个工厂都需要有一个标准的硬件安装流程，给电脑安装上CPU等硬件以及开关。每个工厂都会有一条生产线`make`来生产电脑，并且还会有一个步骤来安装系统。
+
+```js
 // 集团工厂的标准流程
 var Factory = function () {};
 Factory.prototype = {
@@ -281,7 +291,7 @@ Factory.prototype = {
     },
     // 定义装配行为
     make: function () {
-        console.log('Abstract factory cannot make computer');
+        throw 'Abstract factory cannot make computer';
     },
     // 安装系统
     installSystem: function (computer = {}, { system = null } = {}) {
@@ -292,7 +302,32 @@ Factory.prototype = {
         }
     }
 };
+```
 
+在这里，这个工厂的标准并不能被直接使用，没有人会用抽象的标准来生产物品，而不是使用应用标准的实体的工厂。这里的`Factory`仅仅是实现了几个接口的抽象类，每个派生出的子类，即具体的工厂，都需要有一条具体的生产线来生产电脑。你可以看到我们这里抛出了一个错误，因为抽象类是无法进行实例化的。
+
+下面我们可以按照标准来建造工厂了。首先我们建造一个台式机工厂。这个工厂应当符合集团定义的标准，并且拥有一条可以生产台式机的生产线，也就是具体的`make`方法。
+
+```js
+// 台式机工厂
+var PcFactory = function () {};
+PcFactory.prototype = new Factory();
+PcFactory.prototype.make = function (config) {
+    var pc = new Pc();
+
+    this.installBasicHardware(pc, config);
+
+    this.installSystem(pc, config);
+
+    return pc;
+};
+
+var pcFactory = function () {};
+```
+
+接着我们可以再建造一个笔记本工厂。同台式机工厂一样，笔记本工厂是标准工厂派生出来的，拥有一条笔记本生产线的具体工厂。由于笔记本有盖和屏幕，我们还需要给笔记本定义开盒盖的行为。
+
+```js
 // 笔记本工厂
 var LaptopFactory = function () {};
 LaptopFactory.prototype = new Factory();
@@ -310,19 +345,19 @@ LaptopFactory.prototype.make = function (config) {
     return laptop;
 };
 
-// 电脑工厂
-var PcFactory = function () {};
-PcFactory.prototype = new Factory();
-PcFactory.prototype.make = function (config) {
-    var pc = new Pc();
-
-    this.installBasicHardware(pc, config);
-
-    this.installSystem(pc, config);
-
-    return pc;
-};
+var laptopFactory = function () {};
 ```
 
-工厂
+有了两个电脑工厂，我们就可以来生产台式机和笔记本了。
 
+```js
+var pc = pcFactory.make();
+pc.powerOn();
+
+var laptop = laptopFactory.make();
+laptop.openLid();
+```
+
+不同的工厂可以生产出不同类型的电脑，且除了基础的CPU等，可以拥有不同的属性和方法。这样的工厂就符合了我们的开闭原则，即拓展原有代码（`Factory`）时，无需修改其中的内容。我们可以添加无限多类型的电脑和工厂，而不需要修改对于工厂的标准。
+
+对于客户端来说，每增加一个子类，都会产生对应的依赖关系，当子类变得多且巨大时，系统会变得十分复杂，难以维护。为了解决对于子类工厂的依赖，我们再次将子类抽象，即[抽象工厂（Abstract Factory）](/creational-patterns/abstract-factory.md)。

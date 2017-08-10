@@ -4,7 +4,7 @@
 * [基本原则](/basic-principles.md)
 * [创建型模式（Creational Patterns）](/creational-patterns/README.md)
   * [工厂（Factory Method）](/creational-patterns/factory-method.md)
-  * 抽象工厂（Abstract Factory）
+  * [抽象工厂（Abstract Factory）](/creational-patterns/abstract-factory.md)
   * 建造者（Builder）
   * 对象池（Object Pool）
   * 迟加载（Lazy Initialization）
