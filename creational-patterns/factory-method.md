@@ -234,57 +234,97 @@ var pc = ComputerFactory.make({ type: 'pc' });
 
 ## 工厂方法
 
-真正的工厂方法比起简单工厂更加抽象。根据工厂方法的定义，我们需要使一个类的实例化推迟到子类中进行
-
-想让工厂生产台式机？让我们再加一个抽象层，即建立多个车间。
+真正的工厂方法比起简单工厂更加抽象。根据工厂方法的定义，即“定义一个创建对象的接口，但让实现这个接口的类来决定实例化哪个类。工厂方法让类的实例化推迟到子类中进行”，我们需要在简单工厂的基础上再次抽象。为了提高产量，我们决定成立一个集团，其名下有多个工厂。为了保证产品的质量，集团规定了一个工厂的标准，因此工厂仅能按照规定的流程和计划来生产。为了保证分工明确，每个工厂负责生产不同类型的电脑。在抽象层，我们创建了一个抽象类，其中包含了多个子类，它负责决定创建那个对象（具体工厂生产具体产品），管理对象的生命周期（派发及收回），及管理特定对象的创建和销毁（安装系统）。我们用例子来说明。
 
 ```js
+const CPU = function () {};
+const Memory = function () {};
+const HardDisk = function () {};
+const Windows = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'Windows';
+            return laptop;
+        }
+    };
+};
+const MacOs = function () {
+    return {
+        installOn: function (laptop) {
+            laptop.system = 'macOS';
+            return laptop;
+        }
+    };
+};
+
 var Computer = function () {
     this.power = false;
 };
+// 有盖的笔记本电脑
+var Laptop = function () { return { screen: false }; };
+Laptop.prototype = new Computer();
+var Pc = function () {};
+Pc.prototype = new Computer();
 
-Computer.prototype.powerOn = function () { this.power = true; };
-Computer.prototype.powerOff = function () { this.power = false; };
-
+// 集团工厂的标准流程
 var Factory = function () {};
 Factory.prototype = {
-    installBasicHardware: function (computer = {}, { cpu = 'i7-2600', memory = 8, hardDisk = 512 }) {
+    // 安装标准三件套
+    installBasicHardware: function (computer = {}, { cpu = 'i7-2600', memory = 8, hardDisk = 512 } = {}) {
         computer.cpu = new CPU(cpu);
         computer.memory = new Memory(memory);
         computer.hardDisk = new HardDisk(hardDisk);
+
+        computer.powerOn = function () { this.power = true; };
+        computer.powerOff = function () { this.power = false; };
     },
+    // 定义装配行为
     make: function () {
         console.log('Abstract factory cannot make computer');
-    }, 
-    installSystem: function () {
-        Windows.installOn(this);
+    },
+    // 安装系统
+    installSystem: function (computer = {}, { system = null } = {}) {
+        if (system === 'Windows') {
+            computer = this.Windows.installOn(computer);
+        } else if (system === 'macOS') {
+            computer = this.MacOs.installOn(computer);
+        }
     }
 };
 
+// 笔记本工厂
 var LaptopFactory = function () {};
 LaptopFactory.prototype = new Factory();
 LaptopFactory.prototype.make = function (config) {
-    var laptop = new Computer();
+    var laptop = new Laptop();
 
     this.installBasicHardware(laptop, config);
 
-    laptop.screen = false;
+    // 定义笔记本电脑开盖和合盖的操作
     laptop.openLid = function () { this.screen = true; };
     laptop.closeLid = function () { this.screen = false; };
+
+    this.installSystem(laptop, config);
 
     return laptop;
 };
 
+// 电脑工厂
 var PcFactory = function () {};
 PcFactory.prototype = new Factory();
 PcFactory.prototype.make = function (config) {
-    var pc = new Computer();
+    var pc = new Pc();
 
     this.installBasicHardware(pc, config);
 
+    this.installSystem(pc, config);
+
     return pc;
 };
+
+var laptopFactory = new LaptopFactory();
+var pcFactory = new PcFactory();
 ```
 
-
+工厂
 
