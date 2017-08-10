@@ -322,9 +322,6 @@ PcFactory.prototype.make = function (config) {
 
     return pc;
 };
-
-var laptopFactory = new LaptopFactory();
-var pcFactory = new PcFactory();
 ```
 
 工厂
